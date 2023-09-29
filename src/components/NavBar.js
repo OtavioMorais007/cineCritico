@@ -1,3 +1,6 @@
+import { useRef } from "react";
+import { useKey } from "../hooks/useKey";
+
 export function NavBar({ children }) {
   return (
     <nav className="nav-bar">
@@ -17,6 +20,15 @@ function Logo() {
 }
 
 export function Search({ query, setQuery }) {
+  const inputEl = useRef(null);
+
+  useKey("enter", function () {
+    if (document.activeElement === inputEl.current) return;
+
+    inputEl.current.focus();
+    setQuery("");
+  });
+
   return (
     <input
       className="search"
@@ -24,6 +36,7 @@ export function Search({ query, setQuery }) {
       placeholder="Pesquisar filmes..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   );
 }

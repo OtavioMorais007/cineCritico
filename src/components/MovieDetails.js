@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StarRating } from "./StarRating";
 import { Loader } from "./Loader";
+import { useKey } from "../hooks/useKey";
 
 const KEY = "18be3dec";
 
@@ -13,6 +14,12 @@ export function MovieDetails({
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [userRating, setUserRating] = useState("");
+
+  const countRef = useRef(0);
+
+  useEffect(() => {
+    if (userRating) countRef.current++;
+  }, [userRating]);
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
   const watchedUserRating = watched.find(
@@ -41,11 +48,14 @@ export function MovieDetails({
       imdbRating: Number(imdbRating),
       userRating: Number(userRating),
       runtime: Number(runtime.split(" ").at(0)),
+      countRatingDecisions: countRef.current,
     };
 
     onAddWatched(newWatchedMovie);
     onCloseMovie();
   }
+
+  useKey("escape", onCloseMovie);
 
   useEffect(() => {
     async function getMovieDetails() {
@@ -59,6 +69,18 @@ export function MovieDetails({
     }
     getMovieDetails();
   }, [selectedId]);
+
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Filme | ${title}`;
+
+      return function () {
+        document.title = "CineCritíco";
+      };
+    },
+    [title]
+  );
 
   return (
     <div className="details">
